@@ -1,20 +1,20 @@
 from typing import Any, Dict
 
-from django import forms
+from django import forms, shortcuts
 from django.views.generic import FormView
 
 from .models import Todo
 
 
 class TodoListForm(forms.Form):
-    id_nums = forms.TypedChoiceField(choices=())
+    todos = forms.TypedMultipleChoiceField(choices=(), widget=forms.CheckboxSelectMultiple)
 
     def __init__(self, todos, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Need to do this as choices
         todo_choices = [(x.id, x.id) for x in todos]
-        self.fields['id_nums'].choices = todo_choices
+        self.fields['todos'].choices = todo_choices
 
 
 class TodoList(FormView):
@@ -22,8 +22,8 @@ class TodoList(FormView):
     template_name = 'todos/templates/form.html'
 
     def form_valid(self, form):
-        print(form.clean_data)
-        return super.form_valid(form)
+        print(form.cleaned_data)
+        return shortcuts.redirect('/')
 
     def get_queryset(self):
         return Todo.objects.filter(is_selected=False)
